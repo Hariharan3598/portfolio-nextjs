@@ -1,26 +1,166 @@
 @import "tailwindcss";
 
+/*
+ * Dark mode is class-based: the `.dark` class on <html> is toggled
+ * by the ThemeToggle component (and set before paint by an inline
+ * script in app/layout.tsx to avoid a flash of the wrong theme).
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─────────────────────────────────────────────────────────────
+ * Brand palette — built around the primary deep blue #1F4E79.
+ * Use as: bg-brand-600, text-brand-300, border-brand-200, …
+ * ───────────────────────────────────────────────────────────── */
+@theme {
+  --color-brand-50: #eef4fa;
+  --color-brand-100: #d6e4f1;
+  --color-brand-200: #adc9e3;
+  --color-brand-300: #7ea8d0;
+  --color-brand-400: #4f84b8;
+  --color-brand-500: #2f6699;
+  --color-brand-600: #1f4e79; /* primary */
+  --color-brand-700: #1a4266;
+  --color-brand-800: #163653;
+  --color-brand-900: #0f2740;
+  --color-brand-950: #0a1a2b;
+
+  /* Subtle entrance animation used in the hero */
+  --animate-fade-up: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * Semantic color tokens — change these to re-theme the site.
+ * Light values live on :root, dark values on .dark.
+ * ───────────────────────────────────────────────────────────── */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f1c2b;
+  --muted: #4f5f73;
+  --surface: #f4f7fb; /* alternate section background */
+  --card: #ffffff;
+  --border: #e1e8f0;
+  --primary: #1f4e79; /* buttons & solid accents */
+  --primary-hover: #1a4266;
+  --accent: #1f4e79; /* links, eyebrows & highlighted text */
+  --chip: #eef4fa;
+  --chip-foreground: #1a4266;
+  --grid-line: rgb(31 78 121 / 0.07);
+}
+
+.dark {
+  --background: #0a1422;
+  --foreground: #e6edf5;
+  --muted: #9aabbf;
+  --surface: #0d1a2b;
+  --card: #10203a;
+  --border: #1d3350;
+  --primary: #2f6699;
+  --primary-hover: #3a74aa;
+  --accent: #7ea8d0;
+  --chip: #15294a;
+  --chip-foreground: #c3d7ec;
+  --grid-line: rgb(126 168 208 / 0.06);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-accent: var(--accent);
+  --color-chip: var(--chip);
+  --color-chip-foreground: var(--chip-foreground);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ── Base ──────────────────────────────────────────────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
+
+  ::selection {
+    background: var(--color-brand-200);
+    color: var(--color-brand-950);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Decorative hero grid ──────────────────────────────────── */
+.hero-grid {
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+}
+
+/* ── Scroll-reveal (see components/ui/Reveal.tsx) ──────────── */
+/* Only hidden when JS is running, so content is always visible without JS. */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Respect users who prefer less motion ──────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .js .reveal {
+    transform: none;
+  }
 }
